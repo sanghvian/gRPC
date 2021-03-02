@@ -1,0 +1,10 @@
+syntax="proto3";
+
+package dummy_pb;
+
+message DummyMessge{
+    int32 messageId = 1;
+    repeated string message = 2;
+}
+
+service DummyMessageService{}
