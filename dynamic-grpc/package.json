@@ -1,0 +1,19 @@
+{
+  "name": "dynamic-grpc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \" nodemon client/client.js \" \" nodemon server/index.js \" "
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@grpc/proto-loader": "^0.5.6",
+    "concurrently": "^6.0.0",
+    "google-protobuf": "^3.15.6",
+    "grpc": "^1.24.6"
+  }
+}
