@@ -1,20 +1,20 @@
-syntax="proto3";
+// syntax="proto3";
 
-package dynamic;
+// package dynamic;
 
-service DynamicService{
-    rpc Dynamo(DynamicRequest) returns (DynamicResponse){}; 
-}
+// service DynamicService {
+//     rpc Dynamo(DynamicRequest) returns (DynamicResponse){}
+// }
 
-message DynamicObject{
-    string first_name = 1;
-    string last_name = 2;
-}
+// message DynamicObject {
+//     int32 first_name = 1;
+//     string last_name = 2;
+// }
 
-message DynamicRequest{
-    DynamicObject dynaObj = 1;
-}
+// message DynamicRequest {
+//     DynamicObject dynaReq = 1;
+// }
 
-message DynamicResponse{
-    string dynaRes = 1;
-}
+// message DynamicResponse {
+//     string result = 1;
+// }

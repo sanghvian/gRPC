@@ -1,37 +1,35 @@
+const path = require('path')
 const protoLoader = require('@grpc/proto-loader')
 const grpc = require('grpc')
-const path = require('path')
+const fs = require('fs')
 
-// grpc service definition for guest
-
-const dynaProtoPath = path.join(__dirname, "..", "protos", "dynam.proto")
-const dynaProtoDefinition = protoLoader.loadSync(dynaProtoPath, {
-    keepCase: true,
+const greetProtoPath = path.join(__dirname, "..", "protos", "greet.proto")
+const greetProtoDefinition = protoLoader.loadSync(greetProtoPath, {
+    keepCase:true,
+    longs: String,
+    enums: String,
     oneofs: true,
     defaults: true,
-    longs: String,
-    enums:String
 })
 
-const dynaPackageDefinition = grpc.loadPackageDefinition(dynaProtoDefinition).dynamo
-
-const dynamo = (call, callback) =>
+const greet = (call, callback) =>
 {
-    const firstName = call.request.dynaObj.firstName;
-    const lastName = call.request.dynaObj.lastName;
-
-    callback(null,{dynaRes : `Hello ${firstName} ${lastName} `})
+    const firstName = call.request.greeting.first_name;
+    const lastName = call.request.greeting.last_name;
+    callback(null, {result : `Hello ${firstName} ${lastName}`})
 }
 
-function main()
+// const dynaPackageDefinition = grpc.loadPackageDefinition(dynaProtoDefinition).dynamo
+
+const greetPackageDefinition = grpc.loadPackageDefinition(greetProtoDefinition).greet
+
+const main = () =>
 {
     const server = new grpc.Server()
-    server.addService(dynaPackageDefinition.DynamicService.service , {
-        dynamo
-    })
-    const url = "127.0.0.1:5000"
-    server.bind(url, grpc.credentials.createInsecure())
+    server.addService(greetPackageDefinition.GreetService.service, {greet})
+    server.bind('localhost:50051', grpc.ServerCredentials.createInsecure())
     server.start()
-    console.log(`Server running on ${url} `)
+    console.log('Listening on localhost:50051')
 }
+
 main()

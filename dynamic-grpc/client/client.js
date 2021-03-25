@@ -2,41 +2,44 @@ const grpc = require('grpc')
 const protoLoader = require('@grpc/proto-loader')
 const path = require('path')
 
-const dynaProtoPath = path.join(__dirname, '..', 'protos', 'dynam.proto')
-const dynaProtoDefinition = protoLoader.loadSync(dynaProtoPath, {
+const greetProtoPath = path.join(__dirname, "..", "protos", "greet.proto")
+const greetProtoDefinition = protoLoader.loadSync(greetProtoPath, {
+    keepCase: true,
     oneofs: true,
     defaults: true,
     longs: String,
-    enums: String,
-    keepCase:true
+    enums:String
 })
 
-const dynaPackageDefinition = grpc.loadPackageDefinition(dynaProtoDefinition)
+const greetPackageDefinition = grpc.loadPackageDefinition(greetProtoDefinition).greet 
+const client = new greetPackageDefinition.GreetService("localhost:50051", grpc.credentials.createInsecure())
 
-const url = "127.0.0.1:5000"
-
-const client = new dynaPackageDefinition.DynamicServices(url,grpc.credentials.createInsecure())
-
-const callDynaProtoAPI = () =>
+const callGreetings = () =>
 {
     const request = {
-        dynaObj: {
+        greeting :{
             first_name: "Ankit",
-            last_name:"Sanghvi"
+            last_name : "Sanghvi"
         }
     }
 
-    client.dynamo(request, (error, response))
-    if (!error)
+    client.greet(request, (error, response) =>
     {
-        console.log(`Response : ${response.dynaRes}`)
-    } else
-    {
-        
-    }
+        if (!error)
+        {
+            console.log(`Greeting message : ${response.result}`)
+        } else
+        {
+            // console.log(error)
+        }
+    })
 }
 
 const main = () =>
 {
-    callDynaProtoAPI()   
+    callGreetings()
 }
+
+main()
+
+
