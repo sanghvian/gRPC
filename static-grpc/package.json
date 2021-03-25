@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "concurrently \"node client/client.js\" \"node server/index.js\"",
-    "dev": "concurrently \"nodemon client/client.js\" \"nodemon server/index.js\""
+    "dev": "concurrently  \"clear\" \"nodemon client/client.js\" \"nodemon server/index.js\""
   },
   "keywords": [],
   "author": "",

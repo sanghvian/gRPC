@@ -1,61 +1,99 @@
 const grpc = require('grpc');
-const service = require('../server/protos/greet_grpc_pb');
-const sumService = require('../server/protos/sum_grpc_pb')
-const sums = require('../server/protos/sum_pb')
+
 const greets = require('../server/protos/greet_pb')
+const service = require('../server/protos/greet_grpc_pb');
 
-//* Greeting client
-console.log('hello from client')
-const client = new service.GreetServiceClient(
-    `localhost:50051`,
+const sums = require('../server/protos/sum_pb')
+const sumService = require('../server/protos/sum_grpc_pb')
+
+const URL_ENDPOINT = `localhost:50051` 
+
+// //! Greeting client
+// console.log('hello from client')
+// const client = new service.GreetServiceClient(
+//     URL_ENDPOINT,
+//     grpc.credentials.createInsecure()
+// )
+
+// //* Greet request processing
+// const request = new greets.GreetRequest()
+// const greeting = new greets.Greeting()
+// greeting.setFirstName("Ankit")
+// greeting.setLastName("Sanghvi")
+// request.setGreeting(greeting)
+
+// //* Greet response handling
+// client.greet(request, (error, response) =>
+// {
+//     if (!error)
+//     {
+//         console.log("Greeting response is :",response.getResult())
+//     } else
+//     {
+//         console.log(error)
+//     }
+// })
+
+
+// //! Sum client
+// const sumClient = new sumService.SumServiceClient(
+//     URL_ENDPOINT,
+//     grpc.credentials.createInsecure()
+// )
+
+// //* Sum request processing
+// const sumRequest = new sums.SumRequest()
+// const sumObject = new sums.SumMessage()
+// sumObject.setFirstNum(5)
+// sumObject.setSecondNum(19)
+// sumRequest.setSumMessage(sumObject)
+
+// //* Sum response handling
+// sumClient.sum(sumRequest, (error, response) =>
+// {
+//     console.log(sumRequest)
+//     console.log(response)
+//     if (!error)
+//     {
+//         console.log(`Sum result : ${response.getResult()}`)
+//     } else
+//     {
+//         console.log('fml')
+//     }
+// })
+
+//! Greet many times client creation 
+const greetManyTimesClient = new service.GreetServiceClient(
+    URL_ENDPOINT,
     grpc.credentials.createInsecure()
 )
 
-//* Sum Client
-const sumClient = new sumService.SumServiceClient(
-    'localhost:50051',
-    grpc.credentials.createInsecure()
-)
+//* Greet many times request processing
+const greetManyTimesReq = new greets.GreetManyTimesRequest()
+const greetingManyTimes = new greets.Greeting()
+greetingManyTimes.setFirstName('Ankit')
+greetingManyTimes.setLastName('Sanghvi')
+greetManyTimesReq.setGreeting(greetingManyTimes)
 
+const call = greetManyTimesClient.greetManyTimes(greetManyTimesReq, () => {})
 
-//* Request processing
-
-//* Greet request processing
-const request = new greets.GreetRequest()
-const greeting = new greets.Greeting()
-greeting.setFirstName("Ankit")
-greeting.setLastName("Sanghvi")
-request.setGreeting(greeting)
-
-//* Sum request processing
-const sumRequest = new sums.SumRequest()
-const sumObject = new sums.SumMessage()
-sumObject.setFirstNum(3)
-sumObject.setSecondNum(14)
-sumRequest.setSumMessage(sumObject)
-
-//* Response handling
-
-//* Greet response handling
-client.greet(request, (error, response) =>
+call.on('data', (response) =>
 {
-    if (!error)
-    {
-        console.log("Greeting response",response.getResult())
-    } else
-    {
-        console.log(error)
-    }
+    console.log(`Greeting response : ${response}`)
 })
 
-//* Sum response handling
-sumClient.sum(sumRequest, (error, response) =>
+call.on('status', (status) =>
 {
-    if (!error)
-    {
-        console.log(`Sum result : ${response.getResult()}`)
-    } else
-    {
-        console.log(error)
-    }
+    console.log(status)
+})
+
+
+call.on('error', (error) =>
+{
+    console.log(error.message)
+})
+
+call.on('end', () =>
+{
+    console.log('Streaming ended......')
 })

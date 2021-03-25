@@ -2,6 +2,10 @@ syntax="proto3";
 
 package sum;
 
+service SumService{
+    rpc Sum(SumRequest) returns (SumResponse){}
+}
+
 message SumMessage{
     int32 first_num = 1;
     int32 second_num = 2;
@@ -13,8 +17,4 @@ message SumRequest{
 
 message SumResponse{
     int32 result = 1;
-}
-
-service SumService{
-    rpc Sum(SumRequest) returns (SumResponse){}
 }
