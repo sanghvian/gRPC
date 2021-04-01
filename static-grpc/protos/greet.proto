@@ -6,8 +6,19 @@ service GreetService{
     //unary API
     rpc Greet (GreetRequest) returns (GreetResponse){}
 
-    // server push 
+    // Server push 
     rpc GreetManyTimes (GreetManyTimesRequest) returns (stream GreetManyTimesResponse){}
+
+    // Client push
+    rpc LongGreet(stream LongGreetRequest) returns (LongGreetResponse){}
+}
+
+message LongGreetRequest{
+    Greeting lgreeting = 1;
+} 
+
+message LongGreetResponse{
+    string result = 1;
 }
 
 message Greeting{
