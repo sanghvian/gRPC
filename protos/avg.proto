@@ -1,0 +1,15 @@
+syntax="proto3";
+
+package avg;
+
+service AvgService{
+    rpc ComputeAvg(stream AvgRequest) returns (AvgResponse){}
+}
+
+message AvgRequest{
+    int32 num = 1;
+}
+
+message AvgResponse{
+    double average = 1;
+}

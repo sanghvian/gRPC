@@ -1,28 +1,37 @@
 const grpc = require("grpc")
 const chalk = require('chalk')
-const pn = require('./protos/primenum_pb')
-const pnService = require('./protos/primenum_grpc_pb')
+const _ = require('lodash')
+
+const avg = require('./protos/avg_pb')
+const avgService = require('./protos/avg_grpc_pb')
 
 //* RESPONSE PROCESSING
+//! Compute average (client push) request processing
 
-//! Prime number decomposition (server) push request processing
-
-const calcPn = (call, callback) =>
+const computeAvg = (call, callback) =>
 {
-    let pnReq = call.request.getPn()
-    console.log(chalk.greenBright(pnReq))
-    let pnTemp = pnReq
-    for(let i = 2; i < pnReq; i++)
+    const numArray = []
+    call.on('error', (error =>
     {
-        while (pnTemp % i === 0)
-        {
-            pnTemp = pnTemp / i
-            const pnRes = new pn.PnResponse()
-            pnRes.setResult(i)
-            call.write(pnRes)
-        }
-    }
-    call.end()
+        console.log(error)
+    }))
+
+    call.on('end', () =>
+    {
+        console.log('Average has been computed !')
+        const result = new avg.AvgResponse()
+        const calc = (numArray.reduce((i, acc)=> i + acc, 0))/numArray.length
+        result.setAverage(calc)
+
+        console.log(chalk.blue.bold(`Average : ${result.getAverage()}`))
+    })
+
+    call.on('data', request =>
+    {
+        const num = request.getNum()
+        console.log(chalk.blueBright(num))
+        numArray.push(num)
+    })
 }
 
 
@@ -33,8 +42,8 @@ const server = new grpc.Server()
 //* ADDING SERVICES TO SERVER
 
 //* Add greet request to server
+server.addService(avgService.AvgServiceService, { computeAvg })
 
-server.addService(pnService.PnServiceService, { calcPn })
 
 //? START THE SERVER
 const URL_ENDPOINT = "127.0.0.1:50051"
