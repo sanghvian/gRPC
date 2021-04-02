@@ -1,5 +1,7 @@
 const grpc = require("grpc")
 const chalk = require('chalk')
+const _ = require('lodash')
+const kebabcase = require('lodash.kebabcase')
 
 const greets = require('./protos/greet_pb')
 const service = require('./protos/greet_grpc_pb')
@@ -12,6 +14,9 @@ const pnService = require('./protos/primenum_grpc_pb')
 
 const avg = require('./protos/avg_pb')
 const avgService = require('./protos/avg_grpc_pb')
+
+const max = require('./protos/max_pb')
+const maxService = require('./protos/max_grpc_pb')
 
 // const dotenv = require('dotenv')
 
@@ -102,32 +107,119 @@ const avgService = require('./protos/avg_grpc_pb')
 // }
 
 //! Compute average (client push) request processing
-const computeAvg = (call, callback) =>
+// const computeAvg = (call, callback) =>
+// {
+//     const numArray = []
+//     call.on('error', (error =>
+//     {
+//         console.log(error)
+//     }))
+
+//     call.on('end', () =>
+//     {
+//         console.log('Average has been computed !')
+//         const result = new avg.AvgResponse()
+//         const calc = (numArray.reduce((i, acc)=> i + acc, 0))/numArray.length
+//         result.setAverage(calc)
+
+//         console.log(chalk.blue.bold(`Average : ${result.getAverage()}`))
+//     })
+
+//     call.on('data', request =>
+//     {
+//         const num = request.getNum()
+//         console.log(chalk.blueBright(num))
+//         numArray.push(num)
+//     })
+// }
+
+//! Greet everyone (BiDi stream) request processing
+// const sleep = async (interval) => { 
+//     return new Promise((resolve =>
+//     {
+//         setTimeout(()=> resolve(), interval)
+//     }))
+// }
+
+// const greetEveryone = async (call, callback) =>
+// {
+//     // FILLERs had to be added else resultArray length would be 0 and for loop would never run
+//     const resultArray = ['FILLER','FILLER',]
+//     call.on('error', (error) =>
+//     {
+//         console.log(error)
+//     })
+
+//     call.on('end', () =>
+//     {
+//         console.log('Server has stopped streaming from the client....')
+//     })
+    
+//     call.on('data', (request) =>
+//     {
+//         const firstName = request.getGreeting().getFirstName()
+//         const lastName = request.getGreeting().getLastName()
+//         resultArray.push(kebabcase(`${firstName} ${lastName}`))
+//         console.log(chalk.green(`Client just pushed this to me ! : ${firstName} ${lastName}`))
+//     })
+    
+//     for (let i = 0; i < resultArray.length; i++)
+//     {
+//         const result = new greets.GEResponse()
+//         result.setResult(resultArray[i])
+//         call.write(result)
+//         await sleep(4000)
+//     }
+//     call.end()
+// }
+
+const sleep = async (interval) =>
 {
-    const numArray = []
-    call.on('error', (error =>
+    return new Promise(resolve =>
     {
-        console.log(error)
-    }))
-
-    call.on('end', () =>
-    {
-        console.log('Average has been computed !')
-        const result = new avg.AvgResponse()
-        const calc = (numArray.reduce((i, acc)=> i + acc, 0))/numArray.length
-        result.setAverage(calc)
-
-        console.log(chalk.blue.bold(`Average : ${result.getAverage()}`))
-    })
-
-    call.on('data', request =>
-    {
-        const num = request.getNum()
-        console.log(chalk.blueBright(num))
-        numArray.push(num)
+        setTimeout(()=>resolve(),interval)
     })
 }
 
+
+const calciMax = async(call, callback) =>
+{
+    const noOfTimesYouWannaComputeMaximum = 15
+    const numArray = []
+    call.on('data', request =>
+    {
+        const num = request.getNum()
+        console.log(chalk.green(`Client just pushed this number to me : ${num}`))
+        numArray.push(num)
+    })
+
+    call.on('status', status => console.log(chalk.magenta(status)))
+
+    call.on('end', ()=>{console.log(chalk.cyanBright('Client has stopped streaming from the server'))})
+    
+    
+    // let count = 0; intervalID = setInterval(() =>
+    // {
+    //     if (++count == noOfTimesYouWannaComputeMaximum)
+    //     {
+    //         clearInterval(intervalID)
+    //         call.end()
+    //         return
+    //     }
+    //     return numArray.reduce((elem, acc) => acc = max(elem, acc), -Infinity)
+    // }, 3000)
+
+    for (let i = 0; i < noOfTimesYouWannaComputeMaximum; i++)
+    {
+        const maxResponse = new max.MaxResponse()
+        const maximum = _.max(numArray)
+        console.log(maximum)
+        maxResponse.setResult(maximum)
+        call.write(maxResponse)
+        await sleep(3000)
+    }
+    call.end()
+}
 
 //* Setup a server
 const server = new grpc.Server()
@@ -137,17 +229,18 @@ const server = new grpc.Server()
 
 //* Add greet request to server
 // server.addService(service.GreetServiceService, { greet, greetManyTimes })
+// server.addService(sumService.SumServiceService, { sum })
 // server.addService(service.GreetServiceService, { greetManyTimes })
 // server.addService(pnService.PnServiceService, { calcPn })
 // server.addService(service.GreetServiceService, { longGreet })
-server.addService(avgService.AvgServiceService, { computeAvg })
+// server.addService(avgService.AvgServiceService, { computeAvg })
+// server.addService(service.GreetServiceService, { greetEveryone })
+server.addService(maxService.MaximumServiceService, { calciMax })
 
-//* Add sum request to server
-// server.addService(sumService.SumServiceService, { sum })
 
 //? START THE SERVER
 const URL_ENDPOINT = "127.0.0.1:50051"
 server.bind(URL_ENDPOINT, grpc.ServerCredentials.createInsecure())
 server.start()
 
-console.log(chalk.yellow(`Server running on ${URL_ENDPOINT}`))
+console.log(chalk.green(`Server running on ${URL_ENDPOINT}`))

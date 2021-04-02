@@ -4,6 +4,28 @@
 var grpc = require('grpc');
 var protos_greet_pb = require('../protos/greet_pb.js');
 
+function serialize_greet_GERequest(arg) {
+  if (!(arg instanceof protos_greet_pb.GERequest)) {
+    throw new Error('Expected argument of type greet.GERequest');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_greet_GERequest(buffer_arg) {
+  return protos_greet_pb.GERequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_greet_GEResponse(arg) {
+  if (!(arg instanceof protos_greet_pb.GEResponse)) {
+    throw new Error('Expected argument of type greet.GEResponse');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_greet_GEResponse(buffer_arg) {
+  return protos_greet_pb.GEResponse.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_greet_GreetManyTimesRequest(arg) {
   if (!(arg instanceof protos_greet_pb.GreetManyTimesRequest)) {
     throw new Error('Expected argument of type greet.GreetManyTimesRequest');
@@ -107,6 +129,18 @@ longGreet: {
     requestDeserialize: deserialize_greet_LongGreetRequest,
     responseSerialize: serialize_greet_LongGreetResponse,
     responseDeserialize: deserialize_greet_LongGreetResponse,
+  },
+  // Bidirectional stream
+greetEveryone: {
+    path: '/greet.GreetService/GreetEveryone',
+    requestStream: true,
+    responseStream: true,
+    requestType: protos_greet_pb.GERequest,
+    responseType: protos_greet_pb.GEResponse,
+    requestSerialize: serialize_greet_GERequest,
+    requestDeserialize: deserialize_greet_GERequest,
+    responseSerialize: serialize_greet_GEResponse,
+    responseDeserialize: deserialize_greet_GEResponse,
   },
 };
 
