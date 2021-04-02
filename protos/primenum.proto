@@ -1,0 +1,15 @@
+syntax="proto3";
+
+package primenum;
+
+service PnService {
+    rpc CalcPn(PnRequest) returns (stream PnResponse){}
+}
+
+message PnRequest{
+    int32 pn = 1;
+}
+
+message PnResponse{
+    int32 result = 1;
+}
