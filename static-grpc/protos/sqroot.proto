@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+service SqRootService{
+    rpc CalciSqRoot(SQRequest) returns (SQResponse){}
+}
+
+message SQRequest{
+    int32 num = 1;
+}
+
+message SQResponse{
+    double result = 1;
+}
